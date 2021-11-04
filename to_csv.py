@@ -1,30 +1,44 @@
 import csv
 import json
+import os
 
-people1 = json.load(open('people.json'))
-people2 = json.load(open('people_page2.json'))
+import requests
 
-log1 = json.load(open('log.json'))
-log2 = json.load(open('log_page2.json'))
-log3 = json.load(open('log_page3.json'))
+people_database_id = 'b7b730b2a0be400e91e8bcbe04bd6d1a'
+log_database_id = '95cc6edf3199439aa5c8a335e3bc2d86'
+has_more = True
+start_cursor = None
+headers = {'Authorization': os.environ['NOTION_API_KEY'], 'Notion-Version': '2021-08-16'}
 
 all_people = []
 all_log = []
 
-for p in people1['results']:
-  all_people.append(p)
+# fetch all people data
+while has_more:
+  if start_cursor:
+    res = requests.post('https://api.notion.com/v1/databases/' + people_database_id + '/query', headers=headers, json={ 'start_cursor': start_cursor })
+  else:
+    res = requests.post('https://api.notion.com/v1/databases/' + people_database_id + '/query', headers=headers)
+  res_json = res.json()
+  all_people.extend(res_json['results'])
+  has_more = res_json['has_more']
+  start_cursor = res_json['next_cursor']
 
-for p in people2['results']:
-  all_people.append(p)
+# fetch all log data
+has_more = True
+start_cursor = None
+while has_more:
+  if start_cursor:
+    res = requests.post('https://api.notion.com/v1/databases/' + log_database_id + '/query', headers=headers, json={ 'start_cursor': start_cursor })
+  else:
+    res = requests.post('https://api.notion.com/v1/databases/' + log_database_id + '/query', headers=headers)
+  res_json = res.json()
+  all_log.extend(res_json['results'])
+  has_more = res_json['has_more']
+  start_cursor = res_json['next_cursor']
 
-for l in log1['results']:
-  all_log.append(l)
-
-for l in log2['results']:
-  all_log.append(l)
-
-for l in log3['results']:
-  all_log.append(l)
+print('num people: %d' % len(all_people))
+print('num logs: %d' % len(all_log))
 
 with open('people.csv', 'w') as people_out:
   people_writer = csv.writer(people_out)

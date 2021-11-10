@@ -1,4 +1,4 @@
---CREATE EXTENSION pgcrypto;
+CREATE EXTENSION pgcrypto;
 
 CREATE TABLE if not exists people (
     id uuid primary key,

@@ -1,6 +1,7 @@
 # People Log Notion Export
 
-This project contains a simple script to export data from Notion in CSV format.
+This project contains a simple script, `to_csv.py` to export data from Notion in CSV format. Note that the Notion
+database IDs are currently hardcoded, and the script makes certain assumptions about their schemas.
 
 To run:
 ```
